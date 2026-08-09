@@ -1,0 +1,36 @@
+Flight Price Tracker - pipeline merge fix run log
+Date: 2026-06-28
+Script: scripts/pipeline.py  (new function: load_merged_calendar)
+
+WHAT CHANGED
+- "When to fly" now MERGES all calendar snapshots, keeping the most-recent
+  observed price per (route, departure_date), instead of using only the newest
+  file. This uses the daily data you were already collecting.
+- Sample-mode snapshot 2026-06-09 is excluded from both the book and calendar
+  views (EXCLUDE_SNAPSHOTS set in pipeline.py), so synthetic fares no longer
+  reach the dashboard.
+- Near-term/past departures are dropped relative to the freshest snapshot
+  (MIN_LEAD_DAYS = 2), so the axis still starts at 2026-06-29.
+
+RUN OUTPUT
+book rows: 120 over 15 days | calendar rows: 1214 (snap 2026-06-27) | routes: 13
+Wrote prices_master.csv, calendar_latest.csv, app_data.js
+py_compile OK
+
+RESULT (Chiang Mai, BKK-CNX)
+- Calendar dates shown: 60 -> 101   (+41 dates, about +68%)
+- Span: 2026-06-29 .. 2027-05-06    (was 2026-06-29 .. 2027-02-20)
+- Earliest departure >= 2026-06-29: yes; no past dates present
+- Book series: 15 points, 2026-06-11..2026-06-27 (sample 2026-06-09 excluded)
+
+PROCESSED FILES REGENERATED
+- data/processed/app_data.js
+- data/processed/calendar_latest.csv
+- data/processed/prices_master.csv
+
+NOTES / NOT YET DONE
+- Gaps remain where the real (Travelpayouts) source has no fare for a given day.
+  Merging fills what was actually collected; it cannot invent unobserved dates.
+- README.md still says "only the LATEST is used" and the dashboard footer still
+  reads "Sample data until live collection runs". Both are now inaccurate but
+  were left unchanged (outside the approved scope). Say the word to update them.

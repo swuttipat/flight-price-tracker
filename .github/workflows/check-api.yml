@@ -1,0 +1,46 @@
+# Phase 0 spike — throwaway. Proves two things before we build the real pipeline:
+#   1. api.travelpayouts.com answers from a GitHub datacenter IP (the Cowork
+#      sandbox gets a 403, so this is the open question that gates the design).
+#   2. The TRAVELPAYOUTS_TOKEN repo secret is wired through correctly.
+# Manual trigger only — no cron until this passes.
+name: Phase 0 - API reachability check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Raw HTTP reachability (no token)
+        run: |
+          echo "Probing api.travelpayouts.com from this runner..."
+          code=$(curl -s -o /tmp/body.txt -w "%{http_code}" --max-time 30 \
+            "https://api.travelpayouts.com/v1/prices/cheap?origin=BKK&destination=HKT&currency=thb")
+          echo "HTTP status: $code"
+          echo "--- first 300 bytes of response ---"
+          head -c 300 /tmp/body.txt || true
+          echo
+          # 401/403 without a token is expected and still proves the host is reachable.
+          # A timeout or connection failure is the outcome that kills the design.
+          if [ -z "$code" ] || [ "$code" = "000" ]; then
+            echo "::error::Could not reach api.travelpayouts.com at all (network blocked)."
+            exit 1
+          fi
+
+      - name: Authenticated check across all 13 routes
+        env:
+          TRAVELPAYOUTS_TOKEN: ${{ secrets.TRAVELPAYOUTS_TOKEN }}
+        run: |
+          if [ -z "$TRAVELPAYOUTS_TOKEN" ]; then
+            echo "::error::TRAVELPAYOUTS_TOKEN secret is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          python scripts/collector.py --check

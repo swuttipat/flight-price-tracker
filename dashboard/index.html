@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flight Price Tracker — Bangkok</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="../data/processed/app_data.js"></script>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#19202e; --panel2:#202a3b; --ink:#e8edf6; --muted:#94a3b8;
+    --line:#2a3547; --accent:#4f9cf9; --good:#34d399; --bad:#f87171; --warn:#fbbf24; --grid:#222c3c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 18px 56px;}
+  header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;}
+  h1{font-size:21px;margin:0;}
+  .sub{color:var(--muted);font-size:13px;}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0;}
+  select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;min-width:230px;}
+  .tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;}
+  .tabs button{background:transparent;color:var(--muted);border:0;padding:8px 16px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;}
+  .tabs button.active{background:var(--accent);color:#06121f;}
+  .verdict{border-radius:14px;padding:14px 16px;margin-bottom:16px;font-size:15px;font-weight:600;border:1px solid var(--line);background:var(--panel);}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;}
+  .card .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+  .card .value{font-size:22px;font-weight:700;margin-top:6px;}
+  .card .note{font-size:12px;color:var(--muted);margin-top:4px;}
+  .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:18px;}
+  .panel h2{font-size:13px;margin:0 0 12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+  .chart-box{position:relative;height:340px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .hide{display:none;}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:22px;line-height:1.6;}
+  .bar{height:8px;border-radius:999px;background:var(--panel2);overflow:hidden;margin-top:8px;}
+  .bar > div{height:100%;background:var(--good);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>✈️ Flight Price Tracker — from Bangkok</h1>
+    <div class="sub" id="meta"></div>
+  </header>
+
+  <div class="controls">
+    <select id="routeSel"></select>
+    <div class="tabs">
+      <button id="tabBook" class="active" onclick="setTab('book')">When to book</button>
+      <button id="tabFly" onclick="setTab('fly')">When to fly</button>
+    </div>
+  </div>
+
+  <!-- BOOK TAB -->
+  <section id="bookView">
+    <div class="verdict" id="verdict"></div>
+    <div class="cards" id="bookCards"></div>
+    <div class="panel">
+      <h2>Cheapest fare over time — should I book now?</h2>
+      <div class="chart-box"><canvas id="bookChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- FLY TAB -->
+  <section id="flyView" class="hide">
+    <div class="cards" id="flyCards"></div>
+    <div class="panel">
+      <h2>Price by departure date — when is it cheapest to fly?</h2>
+      <div class="chart-box"><canvas id="flyChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2>Cheapest by month</h2>
+      <table id="monthTable"><thead><tr><th>Month</th><th class="num">Cheapest</th><th class="num">Average</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const D = window.FLIGHT_DATA || {meta:{}, routes:[], book:{}, calendar:{}};
+const CUR = D.meta.currency || "THB";
+const fmt = n => (n==null||isNaN(n)) ? "—" : Number(Math.round(n)).toLocaleString("en-US");
+let tab = "book";
+let route = (D.routes[0] && D.routes[0].route) || null;
+let bookChart=null, flyChart=null;
+
+// ---- route picker grouped by country ----
+(function buildPicker(){
+  const sel = document.getElementById("routeSel");
+  const groups = {};
+  D.routes.forEach(r => (groups[r.country] = groups[r.country] || []).push(r));
+  Object.keys(groups).forEach(country => {
+    const og = document.createElement("optgroup"); og.label = country;
+    groups[country].forEach(r => {
+      const o = document.createElement("option");
+      o.value = r.route; o.textContent = `${r.city} (${r.destination})`;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  sel.value = route;
+  sel.onchange = () => { route = sel.value; render(); };
+})();
+
+function routeMeta(rt){ return D.routes.find(r => r.route===rt) || {}; }
+function pct(arr, v){ // share of values strictly greater than v
+  if(!arr.length) return 0;
+  return Math.round(100 * arr.filter(x => x > v).length / arr.length);
+}
+function median(a){ if(!a.length) return null; const s=[...a].sort((x,y)=>x-y); const m=Math.floor(s.length/2);
+  return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+
+function setTab(t){
+  tab = t;
+  document.getElementById("tabBook").classList.toggle("active", t==="book");
+  document.getElementById("tabFly").classList.toggle("active", t==="fly");
+  document.getElementById("bookView").classList.toggle("hide", t!=="book");
+  document.getElementById("flyView").classList.toggle("hide", t!=="fly");
+  render();
+}
+
+function render(){
+  const m = routeMeta(route);
+  document.getElementById("meta").textContent =
+    `${D.meta.n_routes} routes · ${D.meta.date_min||"?"} → ${D.meta.date_max||"?"} · ${CUR}`;
+  if(tab==="book") renderBook(m); else renderFly(m);
+  document.getElementById("foot").innerHTML =
+    `Booking trend tracked daily (collection date). Flight calendar snapshot: ${D.meta.calendar_date||"—"}. `+
+    `Live fares via Travelpayouts · generated ${D.meta.generated_at||"—"}.`;
+}
+
+// ---------- WHEN TO BOOK ----------
+function renderBook(m){
+  const series = D.book[route] || [];
+  if(!series.length){
+    const v = document.getElementById("verdict");
+    v.innerHTML = `${m.city} (${m.route}) — no booking history yet for this route. Try the “When to fly” tab.`;
+    v.className = "verdict warn";
+    document.getElementById("bookCards").innerHTML =
+      '<div class="card"><div class="label">No booking data</div><div class="value">—</div>'+
+      '<div class="note">not collected for this route</div></div>';
+    if(bookChart){ bookChart.destroy(); bookChart = null; }
+    return;
+  }
+  const prices = series.map(d => d.price);
+  const dates = series.map(d => d.date);
+  const cur = prices[prices.length-1];
+  const lo = Math.min(...prices), hi = Math.max(...prices), med = median(prices);
+  const cheaperThan = pct(prices, cur);     // higher = better deal
+  const back = prices.length>7 ? prices[prices.length-8] : prices[0];
+  const trend = cur - back;                  // negative = falling = good
+
+  let verdict, vclass;
+  if(cheaperThan >= 70){ verdict = `🟢 Good time to book — today is cheaper than ${cheaperThan}% of tracked days.`; vclass="good"; }
+  else if(cheaperThan <= 30){ verdict = `🔴 Hold off — today is pricier than ${100-cheaperThan}% of tracked days.`; vclass="bad"; }
+  else { verdict = `🟡 Middle of the range — cheaper than ${cheaperThan}% of tracked days.`; vclass="warn"; }
+  const v = document.getElementById("verdict");
+  v.innerHTML = `${m.city} (${m.route}) — ${verdict}`; v.className = "verdict " + vclass;
+
+  document.getElementById("bookCards").innerHTML = `
+    <div class="card"><div class="label">Current</div><div class="value">${CUR} ${fmt(cur)}</div>
+      <div class="note">as of ${dates[dates.length-1]||"—"}</div></div>
+    <div class="card"><div class="label">Deal score</div><div class="value ${cheaperThan>=70?'good':cheaperThan<=30?'bad':'warn'}">${cheaperThan}/100</div>
+      <div class="bar"><div style="width:${cheaperThan}%"></div></div></div>
+    <div class="card"><div class="label">7-day trend</div><div class="value ${trend<=0?'good':'bad'}">${trend<=0?'▼':'▲'} ${fmt(Math.abs(trend))}</div>
+      <div class="note">${trend<=0?'falling':'rising'}</div></div>
+    <div class="card"><div class="label">All-time low</div><div class="value good">${CUR} ${fmt(lo)}</div></div>
+    <div class="card"><div class="label">All-time high</div><div class="value">${CUR} ${fmt(hi)}</div></div>
+    <div class="card"><div class="label">Median</div><div class="value">${CUR} ${fmt(med)}</div></div>`;
+
+  const flat = v => dates.map(()=>v);
+  const cfg = {
+    type:"line",
+    data:{ labels:dates, datasets:[
+      {label:"Cheapest fare", data:prices, borderColor:"#4f9cf9", backgroundColor:"#4f9cf922",
+       fill:true, tension:.3, pointRadius:0, pointHoverRadius:4, borderWidth:2},
+      {label:"All-time low", data:flat(lo), borderColor:"#34d399", borderDash:[5,5], borderWidth:1, pointRadius:0},
+      {label:"All-time high", data:flat(hi), borderColor:"#f87171", borderDash:[5,5], borderWidth:1, pointRadius:0},
+      {label:"Median", data:flat(med), borderColor:"#94a3b8", borderDash:[2,4], borderWidth:1, pointRadius:0},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+      plugins:{legend:{labels:{color:"#cbd5e1",usePointStyle:true,boxWidth:8}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+": "+CUR+" "+fmt(c.parsed.y)}}},
+      scales:{x:{ticks:{color:"#7f8ea3",maxTicksLimit:8},grid:{color:"#222c3c"}},
+        y:{ticks:{color:"#7f8ea3",callback:v=>fmt(v)},grid:{color:"#222c3c"}}}}
+  };
+  if(bookChart) bookChart.destroy();
+  bookChart = new Chart(document.getElementById("bookChart"), cfg);
+}
+
+// ---------- WHEN TO FLY ----------
+function renderFly(m){
+  const cal = D.calendar[route] || [];
+  const deps = cal.map(d => d.departure_date);
+  const prices = cal.map(d => d.price);
+  if(!cal.length){ document.getElementById("flyCards").innerHTML =
+    '<div class="card"><div class="label">No calendar data</div><div class="value">—</div></div>'; return; }
+  const lo = Math.min(...prices), hi = Math.max(...prices);
+  const iMin = prices.indexOf(lo);
+  const cheapestDate = deps[iMin];
+
+  // cheapest by month
+  const byMonth = {};
+  cal.forEach(d => { const mo = d.departure_date.slice(0,7); (byMonth[mo]=byMonth[mo]||[]).push(d.price); });
+  const months = Object.keys(byMonth).sort();
+  const cheapestMonth = months.reduce((a,b)=> Math.min(...byMonth[b]) < Math.min(...byMonth[a]) ? b : a, months[0]);
+
+  document.getElementById("flyCards").innerHTML = `
+    <div class="card"><div class="label">Cheapest day to fly</div><div class="value good">${CUR} ${fmt(lo)}</div>
+      <div class="note">${cheapestDate}</div></div>
+    <div class="card"><div class="label">Cheapest month</div><div class="value">${cheapestMonth}</div>
+      <div class="note">from ${CUR} ${fmt(Math.min(...byMonth[cheapestMonth]))}</div></div>
+    <div class="card"><div class="label">Most expensive day</div><div class="value bad">${CUR} ${fmt(hi)}</div></div>
+    <div class="card"><div class="label">Dates with fares</div><div class="value">${cal.length}</div>
+      <div class="note">${deps[0]} → ${deps[deps.length-1]}</div></div>`;
+
+  // continuous daily axis: every calendar day from first to last fare; null where no price -> real gaps
+  const priceByDate = {}; cal.forEach(d => priceByDate[d.departure_date] = d.price);
+  const start = new Date(deps[0]+"T00:00:00Z"), end = new Date(deps[deps.length-1]+"T00:00:00Z");
+  const allDays = [], allData = [];
+  for(let t = new Date(start); t <= end; t.setUTCDate(t.getUTCDate()+1)){
+    const iso = t.toISOString().slice(0,10);   // UTC throughout -> no timezone date shift
+    allDays.push(iso); allData.push(priceByDate[iso] ?? null);
+  }
+  const iMinAll = allDays.indexOf(cheapestDate);
+  const colors = allData.map((p,i)=> i===iMinAll ? "#34d399" : "#4f9cf9");
+  const cfg = {
+    type:"bar",
+    data:{labels:allDays, datasets:[{label:"Fare by departure date", data:allData, backgroundColor:colors,
+      borderWidth:0, borderRadius:1}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{title:c=>c[0].label, label:c=>CUR+" "+fmt(c.parsed.y)+(c.dataIndex===iMinAll?"  ⭐ cheapest":"")}}},
+      scales:{x:{ticks:{color:"#7f8ea3",maxTicksLimit:12,autoSkip:true},grid:{display:false}},
+        y:{ticks:{color:"#7f8ea3",callback:v=>fmt(v)},grid:{color:"#222c3c"}}}}
+  };
+  if(flyChart) flyChart.destroy();
+  flyChart = new Chart(document.getElementById("flyChart"), cfg);
+
+  const tb = document.querySelector("#monthTable tbody"); tb.innerHTML="";
+  months.forEach(mo=>{
+    const arr = byMonth[mo]; const mlo = Math.min(...arr); const avg = arr.reduce((a,b)=>a+b,0)/arr.length;
+    tb.insertAdjacentHTML("beforeend",
+      `<tr><td>${mo}</td><td class="num">${CUR} ${fmt(mlo)}</td><td class="num">${CUR} ${fmt(avg)}</td>
+       <td>${mo===cheapestMonth?'<span class="good">cheapest</span>':''}</td></tr>`);
+  });
+}
+
+if(!D.routes.length){
+  document.getElementById("verdict").textContent = "No data. Run collector.py then pipeline.py.";
+} else { render(); }
+</script>
+</body>
+</html>

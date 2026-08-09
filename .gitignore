@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Never commit the Travelpayouts token — it lives in GitHub repo secrets
+.env
+*.token
+secrets.*
+
+# OneDrive / editor cruft
+Thumbs.db
+desktop.ini
+.vscode/
