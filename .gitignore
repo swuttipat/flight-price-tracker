@@ -7,6 +7,9 @@ __pycache__/
 *.token
 secrets.*
 
+# Local tooling config (machine-specific absolute paths)
+.claude/
+
 # OneDrive / editor cruft
 Thumbs.db
 desktop.ini

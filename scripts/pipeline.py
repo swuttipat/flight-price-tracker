@@ -10,6 +10,7 @@ Writes
   data/processed/prices_master.csv     full book-timing history
   data/processed/calendar_latest.csv   merged fly-timing view (freshest price/day)
   data/processed/app_data.js           window.FLIGHT_DATA for the dashboard
+  data/processed/price_change_log.csv  per-route daily move + trailing-window position
 """
 from __future__ import annotations
 import csv
@@ -34,6 +35,14 @@ EXCLUDE_SNAPSHOTS = {"2026-06-09"}
 COUNTRY_ORDER = {"Thailand": 0, "China": 1, "Japan": 2, "Vietnam": 3}
 PRICE_FIELDS = ["date", "route", "origin", "destination", "country", "city", "price", "currency"]
 CAL_FIELDS = ["date", "route", "origin", "destination", "country", "city", "departure_date", "price", "currency"]
+
+# Change-log window: 30 OBSERVATIONS, not 30 calendar days. Collection can skip a
+# day (API outage, disabled workflow), and a gap shouldn't silently shrink the
+# window it's compared against.
+CHANGE_WINDOW = 30
+CHANGE_MIN_FOR_FLAG = 7      # don't call something a "low" on the second day of data
+CHANGE_FIELDS = ["date", "route", "city", "price", "prev_price", "delta", "delta_pct",
+                 "window_n", "low", "high", "pct_rank", "flag"]
 
 
 def _date_ok(s):
@@ -151,6 +160,51 @@ def dedupe_calendar(rows):
     return list(best.values())
 
 
+def build_change_log(book):
+    """Per route per day: the move since the last observation, and where today's
+    price sits inside its own trailing window.
+
+    This is the record behind "is it dropping - book now or wait?". Regenerated
+    in full from the book series rather than appended, so a re-run can't duplicate
+    rows and a corrected raw file flows straight through.
+    """
+    by_route = {}
+    for r in book:
+        by_route.setdefault(r["route"], []).append(r)
+
+    out = []
+    for rows in by_route.values():
+        rows = sorted(rows, key=lambda x: x["date"])
+        for i, r in enumerate(rows):
+            price = r["price"]
+            window = [x["price"] for x in rows[max(0, i - CHANGE_WINDOW + 1):i + 1]]
+            lo, hi = min(window), max(window)
+            prev = rows[i - 1]["price"] if i else None
+
+            # share of the window cheaper than today; 0 = cheapest we've seen
+            rank = ""
+            if len(window) > 1:
+                cheaper = sum(1 for p in window[:-1] if p < price)
+                rank = round(100.0 * cheaper / (len(window) - 1), 1)
+
+            flag = ""
+            if len(window) >= CHANGE_MIN_FOR_FLAG:
+                if price == lo:
+                    flag = f"low in {len(window)}"
+                elif price == hi:
+                    flag = f"high in {len(window)}"
+
+            out.append({
+                "date": r["date"], "route": r["route"], "city": r["city"], "price": price,
+                "prev_price": prev if prev is not None else "",
+                "delta": (price - prev) if prev is not None else "",
+                "delta_pct": round(100.0 * (price - prev) / prev, 1) if prev else "",
+                "window_n": len(window), "low": lo, "high": hi,
+                "pct_rank": rank, "flag": flag,
+            })
+    return sorted(out, key=lambda x: (x["date"], x["route"]))
+
+
 def build():
     book = load_book()
     book_routes = {r["route"] for r in book}
@@ -170,6 +224,11 @@ def build():
     cal_sorted = sorted(cal, key=lambda r: (r["route"], r["departure_date"]))
     with open(os.path.join(OUT_DIR, "calendar_latest.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=CAL_FIELDS); w.writeheader(); w.writerows(cal_sorted)
+
+    # per-route change log, derived from the book series
+    changes = build_change_log(book)
+    with open(os.path.join(OUT_DIR, "price_change_log.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=CHANGE_FIELDS); w.writeheader(); w.writerows(changes)
 
     # route metadata (ordered by country then city)
     rmeta = {}
@@ -210,7 +269,9 @@ def build():
         f.write(";\n")
 
     print(f"book rows: {len(book)} over {len(dates)} days | calendar rows: {len(cal)} (snap {snap}) | routes: {len(routes)}")
-    print("Wrote prices_master.csv, calendar_latest.csv, app_data.js")
+    flagged = sum(1 for c in changes if c["flag"])
+    print(f"change log: {len(changes)} rows, {flagged} flagged")
+    print("Wrote prices_master.csv, calendar_latest.csv, app_data.js, price_change_log.csv")
 
 
 if __name__ == "__main__":
