@@ -26,6 +26,11 @@ problem the sandbox used to hit. The old OneDrive copy under
    (When to book / When to fly). Re-run the pipeline before opening it.
 4. **Collection is automated.** `.github/workflows/daily-collect.yml` runs steps 1-2
    at 01:00 UTC (08:00 Bangkok) and commits the result. Nothing runs on Max's laptop.
+5. **Publishing is automated.** `.github/workflows/pages.yml` redeploys
+   https://swuttipat.github.io/flight-price-tracker/ after each collection. It triggers on
+   `workflow_run`, not `push`, because the collector's GITHUB_TOKEN commit fires no push
+   event. Keep it that way, and keep the staged layout matching the dashboard's
+   `../data/processed/app_data.js` relative path.
 5. `scripts/run.bat` now only does `git pull` — it no longer calls the API.
 
 ## Project-Specific Rules

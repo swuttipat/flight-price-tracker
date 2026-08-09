@@ -1,5 +1,7 @@
 # Flight Price Tracker — from Bangkok
 
+**Live dashboard: https://swuttipat.github.io/flight-price-tracker/**
+
 A decision-support dashboard for flight prices on 13 routes out of **BKK**, fed by a
 manually-collected dataset. Answers two questions:
 
@@ -22,7 +24,8 @@ Edit the `ROUTES` list in `collector.py` to change them.
    - `YYYY-MM-DD-calendar.csv` — fly-timing: cheapest fare per departure date (~180 days).
 2. **Pipeline** — `pipeline.py` merges raw files into `data/processed/`:
    `prices_master.csv`, `calendar_latest.csv`, and `app_data.js` (the dashboard's data).
-3. **Dashboard** — `dashboard/index.html` (Chart.js). Double-click to open. Two tabs:
+3. **Dashboard** — `dashboard/index.html` (Chart.js). Double-click to open locally, or use
+   the live link above (redeployed automatically after each daily collection). Two tabs:
    - *When to book*: price-over-time with all-time low/high/median band, a **deal score**
      (today vs its own history), and a 7-day trend.
    - *When to fly*: price by departure date with the cheapest day highlighted, plus a

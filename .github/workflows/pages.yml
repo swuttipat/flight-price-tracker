@@ -1,0 +1,74 @@
+# Publishes the dashboard to https://swuttipat.github.io/flight-price-tracker/
+# so it can be opened from a phone instead of double-clicking a local file.
+#
+# NOTE ON THE TRIGGERS: daily-collect.yml commits the new data with GITHUB_TOKEN,
+# and token pushes deliberately do NOT fire `push` events — otherwise a workflow
+# could loop forever. So the daily redeploy hangs off `workflow_run` (which does
+# fire) rather than off the data commit itself.
+name: Deploy dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'dashboard/**'
+      - 'data/processed/**'
+      - '.github/workflows/pages.yml'
+  workflow_run:
+    workflows: ["Daily flight price collection"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One live site — a newer deploy should win, not queue behind a stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # A failed collection leaves the previous day's data in place; keep the old
+    # site up rather than republishing it as if it were fresh.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # On workflow_run, github.sha is the commit that STARTED the collection,
+          # which predates that run's own data commit. Take the branch tip instead.
+          ref: ${{ github.event.repository.default_branch }}
+
+      # enablement: true switches Pages on the first time this runs, so the site
+      # does not depend on anyone flipping a switch in repo settings.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Stage the site
+        run: |
+          mkdir -p _site/dashboard _site/data/processed
+          cp index.html            _site/                        # redirect to ./dashboard/
+          cp dashboard/index.html  _site/dashboard/
+          # dashboard/index.html loads ../data/processed/app_data.js — keep that path.
+          cp data/processed/app_data.js _site/data/processed/
+          cp data/processed/price_change_log.csv _site/data/processed/
+          echo "Staged $(du -sh _site | cut -f1) across $(find _site -type f | wc -l) files."
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summary
+        run: echo "Dashboard live at ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"

@@ -17,6 +17,12 @@
   Trigger was the wifi-at-boot race: Task Scheduler at logon fired before the network
   was up. Cloud collection removes the laptop from the loop entirely.
 
+- 2026-08-09 — Dashboard published to GitHub Pages at
+  https://swuttipat.github.io/flight-price-tracker/ via `.github/workflows/pages.yml`.
+  Redeploys after each daily collection. Uses `workflow_run` rather than `push` because
+  the collector commits with GITHUB_TOKEN, which fires no push event; `configure-pages`
+  runs with `enablement: true` so Pages turned itself on with no settings click.
+
 ## Key Context
 
 - Goal: help decide WHEN TO BOOK (price trend / deal score) and WHEN TO FLY
