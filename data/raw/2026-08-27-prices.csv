@@ -1,0 +1,9 @@
+date,route,origin,destination,country,city,price,currency
+2026-08-27,BKK-HKT,BKK,HKT,Thailand,Phuket,1526,THB
+2026-08-27,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2032,THB
+2026-08-27,BKK-KBV,BKK,KBV,Thailand,Krabi,1120,THB
+2026-08-27,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,1613,THB
+2026-08-27,BKK-CAN,BKK,CAN,China,Guangzhou,5269,THB
+2026-08-27,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,4511,THB
+2026-08-27,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4720,THB
+2026-08-27,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4229,THB
