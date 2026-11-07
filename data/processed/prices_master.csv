@@ -131,6 +131,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-CAN,BKK,CAN,China,Guangzhou,4671,THB
 2026-11-05,BKK-CAN,BKK,CAN,China,Guangzhou,4938,THB
 2026-11-06,BKK-CAN,BKK,CAN,China,Guangzhou,5048,THB
+2026-11-07,BKK-CAN,BKK,CAN,China,Guangzhou,5048,THB
 2026-06-11,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,2563,THB
 2026-06-12,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,2563,THB
 2026-06-13,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,2563,THB
@@ -263,6 +264,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,2526,THB
 2026-11-05,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,2526,THB
 2026-11-06,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,2459,THB
+2026-11-07,BKK-CEI,BKK,CEI,Thailand,Chiang Rai,2459,THB
 2026-06-11,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2553,THB
 2026-06-12,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2152,THB
 2026-06-13,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2152,THB
@@ -395,6 +397,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2329,THB
 2026-11-05,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2347,THB
 2026-11-06,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2347,THB
+2026-11-07,BKK-CNX,BKK,CNX,Thailand,Chiang Mai,2347,THB
 2026-06-11,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4074,THB
 2026-06-12,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4074,THB
 2026-06-13,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4074,THB
@@ -527,6 +530,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4054,THB
 2026-11-05,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4080,THB
 2026-11-06,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4080,THB
+2026-11-07,BKK-DAD,BKK,DAD,Vietnam,Da Nang,4080,THB
 2026-06-11,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4865,THB
 2026-06-12,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4823,THB
 2026-06-13,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4823,THB
@@ -659,6 +663,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4954,THB
 2026-11-05,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4865,THB
 2026-11-06,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4865,THB
+2026-11-07,BKK-HAN,BKK,HAN,Vietnam,Hanoi,4865,THB
 2026-06-11,BKK-HKT,BKK,HKT,Thailand,Phuket,910,THB
 2026-06-12,BKK-HKT,BKK,HKT,Thailand,Phuket,906,THB
 2026-06-13,BKK-HKT,BKK,HKT,Thailand,Phuket,906,THB
@@ -791,6 +796,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-HKT,BKK,HKT,Thailand,Phuket,1845,THB
 2026-11-05,BKK-HKT,BKK,HKT,Thailand,Phuket,1845,THB
 2026-11-06,BKK-HKT,BKK,HKT,Thailand,Phuket,1874,THB
+2026-11-07,BKK-HKT,BKK,HKT,Thailand,Phuket,1874,THB
 2026-06-11,BKK-HND,BKK,HND,Japan,Tokyo (Haneda),12742,THB
 2026-06-12,BKK-HND,BKK,HND,Japan,Tokyo (Haneda),12922,THB
 2026-06-13,BKK-HND,BKK,HND,Japan,Tokyo (Haneda),12915,THB
@@ -923,6 +929,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-HND,BKK,HND,Japan,Tokyo (Haneda),12894,THB
 2026-11-05,BKK-HND,BKK,HND,Japan,Tokyo (Haneda),12894,THB
 2026-11-06,BKK-HND,BKK,HND,Japan,Tokyo (Haneda),12935,THB
+2026-11-07,BKK-HND,BKK,HND,Japan,Tokyo (Haneda),13439,THB
 2026-06-11,BKK-KBV,BKK,KBV,Thailand,Krabi,1666,THB
 2026-06-12,BKK-KBV,BKK,KBV,Thailand,Krabi,1819,THB
 2026-06-13,BKK-KBV,BKK,KBV,Thailand,Krabi,1819,THB
@@ -1055,6 +1062,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-KBV,BKK,KBV,Thailand,Krabi,2147,THB
 2026-11-05,BKK-KBV,BKK,KBV,Thailand,Krabi,2139,THB
 2026-11-06,BKK-KBV,BKK,KBV,Thailand,Krabi,1987,THB
+2026-11-07,BKK-KBV,BKK,KBV,Thailand,Krabi,1987,THB
 2026-06-11,BKK-KIX,BKK,KIX,Japan,Osaka,10808,THB
 2026-06-12,BKK-KIX,BKK,KIX,Japan,Osaka,10808,THB
 2026-06-13,BKK-KIX,BKK,KIX,Japan,Osaka,10808,THB
@@ -1187,6 +1195,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-KIX,BKK,KIX,Japan,Osaka,12264,THB
 2026-11-05,BKK-KIX,BKK,KIX,Japan,Osaka,12264,THB
 2026-11-06,BKK-KIX,BKK,KIX,Japan,Osaka,12264,THB
+2026-11-07,BKK-KIX,BKK,KIX,Japan,Osaka,11747,THB
 2026-06-11,BKK-NRT,BKK,NRT,Japan,Tokyo (Narita),10281,THB
 2026-06-12,BKK-NRT,BKK,NRT,Japan,Tokyo (Narita),10281,THB
 2026-06-13,BKK-NRT,BKK,NRT,Japan,Tokyo (Narita),10281,THB
@@ -1319,6 +1328,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-NRT,BKK,NRT,Japan,Tokyo (Narita),11852,THB
 2026-11-05,BKK-NRT,BKK,NRT,Japan,Tokyo (Narita),11441,THB
 2026-11-06,BKK-NRT,BKK,NRT,Japan,Tokyo (Narita),11441,THB
+2026-11-07,BKK-NRT,BKK,NRT,Japan,Tokyo (Narita),11441,THB
 2026-06-11,BKK-PEK,BKK,PEK,China,Beijing,8761,THB
 2026-06-12,BKK-PEK,BKK,PEK,China,Beijing,8761,THB
 2026-06-13,BKK-PEK,BKK,PEK,China,Beijing,8761,THB
@@ -1451,6 +1461,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-PEK,BKK,PEK,China,Beijing,7821,THB
 2026-11-05,BKK-PEK,BKK,PEK,China,Beijing,7821,THB
 2026-11-06,BKK-PEK,BKK,PEK,China,Beijing,7821,THB
+2026-11-07,BKK-PEK,BKK,PEK,China,Beijing,7821,THB
 2026-06-11,BKK-PVG,BKK,PVG,China,Shanghai,7669,THB
 2026-06-12,BKK-PVG,BKK,PVG,China,Shanghai,7126,THB
 2026-06-13,BKK-PVG,BKK,PVG,China,Shanghai,7123,THB
@@ -1583,6 +1594,7 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-PVG,BKK,PVG,China,Shanghai,6217,THB
 2026-11-05,BKK-PVG,BKK,PVG,China,Shanghai,6217,THB
 2026-11-06,BKK-PVG,BKK,PVG,China,Shanghai,6217,THB
+2026-11-07,BKK-PVG,BKK,PVG,China,Shanghai,6217,THB
 2026-06-11,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,5363,THB
 2026-06-12,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,5363,THB
 2026-06-13,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,5139,THB
@@ -1715,3 +1727,4 @@ date,route,origin,destination,country,city,price,currency
 2026-11-04,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,4798,THB
 2026-11-05,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,4798,THB
 2026-11-06,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,4499,THB
+2026-11-07,BKK-SGN,BKK,SGN,Vietnam,Ho Chi Minh City,4511,THB
